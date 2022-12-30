@@ -39,7 +39,7 @@ def search():
     if data == []:
         print('Запись не найдена')
     else:
-        data.insert(0, ('ID', 'Название', 'Навыки', 'Описание', 'Зарплата', 'Тип'))
+        data.insert(0, ('ID', 'Название', 'Навыки', 'Описание', 'Зарплата', 'Тип_id'))
         print(tabulate(data))
 
 
@@ -54,7 +54,7 @@ def search_partial():
     if data == []:
         print('Запись не найдена')
     else:
-        data.insert(0, ('ID', 'Название', 'Навыки', 'Описание', 'Зарплата', 'Тип'))
+        data.insert(0, ('ID', 'Название', 'Навыки', 'Описание', 'Зарплата', 'Тип_id'))
         print(tabulate(data))
 
 
@@ -107,7 +107,7 @@ def main_menu():
         print(iter, options[iter])
     option = check_numeric("Выберите действие: ", 1, 8)
     print("Выбрано: ", options[option])
-    functions[option]()  # можно передавать без аргумента "()"
+    functions[option]()
 
     user_dec = input('Вернуться в меню - Enter, номер функции - от 1 до 7, выйти - exit: ')
     if user_dec == 'exit':

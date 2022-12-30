@@ -46,7 +46,7 @@ class ConnectDb:
     def insert_in_db(self, name, skills, description, salary, type):
         conn = sqlite3.connect(self.connstring)
         cursor = conn.cursor()
-        dbstring = f'''INSERT INTO VACANCIES (NAME, SKILLS, DESCRIPTION, SALARY, TYPE) VALUES 
+        dbstring = f'''INSERT INTO VACANCIES (NAME, SKILLS, DESCRIPTION, SALARY, TYPE_ID) VALUES 
                 ('{name}', '{skills}', '{description}', '{salary}', '{type}')'''
         cursor.execute(dbstring)
         conn.commit()
@@ -63,7 +63,7 @@ class ConnectDb:
                 'skills': row[2],
                 'description': row[3],
                 'salary': row[4],
-                'type': row[5]
+                'type_id': row[5]
             }
         conn.close()
         return res
@@ -87,4 +87,4 @@ class ConnectDb:
     def finish(self, data_dict):
         self.clear_db()
         for value in data_dict.items():
-            self.insert_in_db(value["NAME"], value["SKILLS"], value["DESCRIPTION"], value["SALARY"], value["TYPE"])
+            self.insert_in_db(value["NAME"], value["SKILLS"], value["DESCRIPTION"], value["SALARY"], value["TYPE_ID"])
