@@ -1,5 +1,5 @@
-import os
 import sqlite3
+from tabulate import tabulate
 
 connname = 'vacancies.db'
 
@@ -23,10 +23,18 @@ class ConnectDb:
     def select_all_db(self):
         conn = sqlite3.connect(self.connstring)
         cursor = conn.cursor()
-        data = cursor.execute('''SELECT * FROM VACANCIES''')
+        cursor.execute('''SELECT * FROM VACANCIES''')
+        data = cursor.fetchall()
         cursor.close()
         conn.close()
         return data
+
+    def delete_by_id(self, id):
+        conn = sqlite3.connect(self.connstring)
+        cursor = conn.cursor()
+        cursor.execute(f'''DELETE FROM VACANCIES WHERE ID = '{id}';''')
+        conn.commit()
+        conn.close()
 
     def clear_db(self):
         conn = sqlite3.connect(self.connstring)
@@ -43,8 +51,6 @@ class ConnectDb:
         cursor.execute(dbstring)
         conn.commit()
         conn.close()
-
-    # from_sql_to_dict (former)
 
     def from_sql_to_dict(self):
         conn = sqlite3.connect(self.connstring)
@@ -65,18 +71,20 @@ class ConnectDb:
     def select_where(self, column, value):
         conn = sqlite3.connect(self.connstring)
         cursor = conn.cursor()
-        data = cursor.execute(f"""SELECT * FROM VACANCIES WHERE {column} = '{value}'""")
+        cursor.execute(f"""SELECT * FROM VACANCIES WHERE {column} = '{value}'""")
+        data = cursor.fetchall()
         conn.close()
         return data
 
     def select_where_like(self, column, value):
         conn = sqlite3.connect(self.connstring)
         cursor = conn.cursor()
-        data = cursor.execute(f"""SELECT * FROM VACANCIES WHERE {column} LIKE '%{value}%'""")
+        cursor.execute(f"""SELECT * FROM VACANCIES WHERE {column} LIKE '%{value}%'""")
+        data = cursor.fetchall()
         conn.close()
         return data
 
     def finish(self, data_dict):
         self.clear_db()
-        for key, value in data_dict.items():
+        for value in data_dict.items():
             self.insert_in_db(value["NAME"], value["SKILLS"], value["DESCRIPTION"], value["SALARY"], value["TYPE"])

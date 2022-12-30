@@ -1,83 +1,77 @@
-from Notes import Notes
+from ConnectDb import ConnectDb
+from tabulate import tabulate
 
-notes = Notes()
+connect = ConnectDb()
 
-PBVERSION = '1.1'
+VACVERSION = '1.0'
 
-def get_notes():
-    data_dict = notes.get_all()
-    print("Ключ", "Название", "Ключевые навыки", "Описание", "Зарлпата", "Тип", sep="\t")
-    for key, value in data_dict.items():
-        print(key, value['NAME'], value['SKILLS'], value['DESCRIPTION'], value['SALARY'], value['TYPE'], sep="\t")
+
+def get_records():
+    data = connect.select_all_db()
+    data.insert(0, ('ID', 'Название', 'Навыки', 'Описание', 'Зарплата', 'Тип'))
+    print(tabulate(data))
+
 
 def add_record():
-    data_list = []
-    data_list.append(input('Введите наименование вакансии: '))
-    data_list.append(input('Введите ключевые навыки: '))
-    data_list.append(input('Введите описание: '))
-    data_list.append(input('Введите размер заработной платы: '))
-    data_list.append(input('Введите тип вакансии (1 - удаленный, 2 - смешанный, 3 - в офисе): '))
-    print(data_list)
-    notes.add_note(data_list)
-    notes.end()
+    data = []
+    data.append(input('Введите наименование вакансии: '))
+    data.append(input('Введите ключевые навыки: '))
+    data.append(input('Введите описание: '))
+    res = False
+    while not res:
+        salary = input('Введите размер заработной платы: ')
+        if salary.isdigit():
+            data.append(float(salary))
+            res = True
+    res1 = False
+    while not res1:
+        type = input('Введите тип вакансии (1 - удаленный, 2 - смешанный, 3 - в офисе): ')
+        if type.isdigit() and int(type) in range(1, 4):
+            data.append(int(type))
+            res1 = True
+    connect.insert_in_db(data[0], data[1], data[2], data[3], data[4])
 
-
-def export():
-    while True:
-        file_name = input('Введите имя файла (без расширения): ')
-        file_type = input('Введите расширение (json / csv, json - по умолчанию): ')
-        temp = notes.export_notes(file_name, file_type)
-        if temp is not False:
-            break
-
-
-def import_data():
-    while True:
-        file_name = input('Введите имя файла (с расширением): ')
-        file_type = input('Введите расширение (json / csv / sql, json - по умолчанию): ')
-        temp = notes.import_notes(file_name, file_type)
-        if temp is not False:
-            notes.end()
-            break
-
-# def search(self, lastname):
 
 def search():
     ln = input('Введите название (целиком): ')
-    data = notes.search(ln)
+    column = "NAME"
+    data = connect.select_where(column, ln)
     if data == []:
         print('Запись не найдена')
     else:
-        print(*data, sep="\n")
+        data.insert(0, ('ID', 'Название', 'Навыки', 'Описание', 'Зарплата', 'Тип'))
+        print(tabulate(data))
 
 
 def search_partial():
-    ln = input('Введите название (5 символов): ')
-    data = notes.search_alike(ln)
+    res = False
+    while not res:
+        ln = input('Введите название (5 символов): ')
+        if len(ln) == 5:
+            break
+    column = "NAME"
+    data = connect.select_where_like(column, ln)
     if data == []:
         print('Запись не найдена')
     else:
-        print(*data, sep="\n")
+        data.insert(0, ('ID', 'Название', 'Навыки', 'Описание', 'Зарплата', 'Тип'))
+        print(tabulate(data))
 
 
 def delete_record():
     while True:
         id_ = input('Введите ID: ')
         if id_.isdigit():
-            notes.delete_by_id(id_)
-            notes.end()
+            connect.delete_by_id(id_)
             break
 
+
 def purge_database():
-    notes.clear_all()
-    notes.end()
+    connect.clear_db()
 
-def exit_phonebook():
-    notes.end()
+
+def exit_db():
     exit()
-
-def check_menu():
-    print('Работает функция')
 
 
 def check_numeric(message, min_, max_):
@@ -94,34 +88,32 @@ def check_numeric(message, min_, max_):
 
 
 def main_menu():
-    print(f"Телефонный справочник: {PBVERSION}")
+    print(f"База вакансий: {VACVERSION}")
     options = {1: "Добавление записей",
                2: "Вывод на экран",
-               3: "Импорт",
-               4: "Экспорт",
-               5: "Удаление записей",
-               6: "Полнотекстовый поиск ",
-               7: "Поиск (5 символов)",
-               8: "Завершить работу",
-               9: "Очистка базы"}
+               3: "Удаление записей",
+               4: "Полнотекстовый поиск ",
+               5: "Поиск (5 символов)",
+               6: "Завершить работу",
+               7: "Очистка базы"}
     functions = {1: add_record,
-             2: get_notes,
-             3: import_data,
-             4: export,
-             5: delete_record,
-             6: search,
-             7: search_partial,
-             8: exit_phonebook,
-             9: purge_database}
+                 2: get_records,
+                 3: delete_record,
+                 4: search,
+                 5: search_partial,
+                 6: exit_db,
+                 7: purge_database}
     for iter in options.keys():
         print(iter, options[iter])
-    option = check_numeric("Выберите действие: ", 1, 9)
+    option = check_numeric("Выберите действие: ", 1, 8)
     print("Выбрано: ", options[option])
-    functions[option]() # можно передавать без аргумента "()"
+    functions[option]()  # можно передавать без аргумента "()"
 
-    user_dec = input('Продолжить - Enter, выйти - exit: ')
+    user_dec = input('Вернуться в меню - Enter, номер функции - от 1 до 7, выйти - exit: ')
     if user_dec == 'exit':
-        exit_phonebook()
+        exit_db()
+    elif user_dec.isdigit() and int(user_dec) in range(1, 8):
+        functions[int(user_dec)]()
     else:
         main_menu()
     return option
