@@ -114,6 +114,7 @@ def main_menu():
         exit_db()
     elif user_dec.isdigit() and int(user_dec) in range(1, 8):
         functions[int(user_dec)]()
+        main_menu()
     else:
         main_menu()
     return option
